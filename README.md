@@ -1,4 +1,4 @@
-# NestJS Template 1
+# NestJS Vertical Slice Architecture Template
 
 Template for NestJS projects using Vertical Slice Architecture, CQRS, SQL database, JWT authentication.
 
