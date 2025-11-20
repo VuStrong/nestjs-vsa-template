@@ -11,7 +11,7 @@ import { QueryBus } from '@nestjs/cqrs';
 
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { ReqUser } from 'src/common/decorators/req-user.decorator';
-import { UserDto } from 'src/user/dtos/user.dto';
+import { UserDto } from 'src/user/dto/user.dto';
 import { GetUserByIdQuery } from './get-user-by-id.query';
 
 @ApiBearerAuth()

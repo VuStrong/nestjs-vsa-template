@@ -1,13 +1,20 @@
 import { NestFactory } from '@nestjs/core';
-import { VersioningType } from '@nestjs/common';
+import {
+    ValidationError,
+    ValidationPipe,
+    VersioningType,
+} from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { GlobalExceptionFilter } from './common/exceptions/global.exception-filter';
+import { ValidationException } from './common/exceptions/validation.exception';
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
-    
+
+    // Global
     app.setGlobalPrefix('api');
+    app.useGlobalPipes(newValidationPipe());
     app.useGlobalFilters(new GlobalExceptionFilter());
 
     // API Versioning
@@ -23,16 +30,34 @@ async function bootstrap() {
         .setVersion('1.0')
         .addBearerAuth()
         .build();
-    const documentFactory = () => SwaggerModule.createDocument(app, swaggerConfig);
+    const documentFactory = () =>
+        SwaggerModule.createDocument(app, swaggerConfig);
     SwaggerModule.setup('swagger', app, documentFactory);
 
     // CORS
     app.enableCors({
-        origin: "*",
-        methods: ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE"],
+        origin: '*',
+        methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE'],
     });
 
     await app.listen(process.env.PORT ?? 3000);
+}
+
+function newValidationPipe() {
+    return new ValidationPipe({
+        whitelist: true,
+        transform: true,
+        exceptionFactory: (validationErrors: ValidationError[] = []) => {
+            const details = {};
+            validationErrors.forEach((error) => {
+                details[error.property] = error.constraints
+                    ? Object.values(error.constraints)
+                    : [];
+            });
+
+            return new ValidationException('Validation failed', details);
+        },
+    });
 }
 
 bootstrap();

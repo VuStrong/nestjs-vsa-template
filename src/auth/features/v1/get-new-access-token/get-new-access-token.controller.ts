@@ -1,4 +1,4 @@
-import { Body, Controller, HttpCode, Post, UsePipes } from '@nestjs/common';
+import { Body, Controller, HttpCode, Post } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import {
     ApiForbiddenResponse,
@@ -8,15 +8,13 @@ import {
     ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
-import { ZodValidationPipe } from 'src/common/pipes/zod-validation.pipe';
 import {
     GetNewAccessTokenCommand,
-    GetNewAccessTokenResponse,
 } from './get-new-access-token.command';
 import {
-    GetNewAccessTokenRequest,
-    getNewAccessTokenRequestSchema,
-} from './get-new-access-token.request';
+    GetNewAccessTokenRequestDto,
+    GetNewAccessTokenResponseDto
+} from './get-new-access-token.dto';
 
 @ApiTags('auth')
 @Controller({
@@ -29,11 +27,10 @@ export class GetNewAccessTokenController {
     @ApiOperation({ summary: 'Get new access token' })
     @ApiUnauthorizedResponse({ description: 'Invalid refresh token' })
     @ApiForbiddenResponse({ description: 'You are locked out' })
-    @ApiOkResponse({ type: GetNewAccessTokenResponse })
+    @ApiOkResponse({ type: GetNewAccessTokenResponseDto })
     @HttpCode(200)
     @Post('new-at')
-    @UsePipes(new ZodValidationPipe(getNewAccessTokenRequestSchema))
-    async getNewAT(@Body() request: GetNewAccessTokenRequest) {
+    async getNewAT(@Body() request: GetNewAccessTokenRequestDto) {
         return this.commandBus.execute(
             new GetNewAccessTokenCommand(request.refreshToken, request.userId),
         );

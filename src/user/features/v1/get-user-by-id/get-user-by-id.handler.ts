@@ -5,7 +5,7 @@ import { EntityPropertyNotFoundError, Repository } from 'typeorm';
 import { ValidationException } from 'src/common/exceptions/validation.exception';
 import { ResourceNotFoundException } from 'src/common/exceptions/resource-not-found.exception';
 import User from 'src/data/entities/user.entity';
-import { UserDto } from 'src/user/dtos/user.dto';
+import { UserDto } from 'src/user/dto/user.dto';
 import { GetUserByIdQuery } from './get-user-by-id.query';
 
 @QueryHandler(GetUserByIdQuery)

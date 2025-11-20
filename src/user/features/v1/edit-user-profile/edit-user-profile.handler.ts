@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 
 import { ResourceNotFoundException } from 'src/common/exceptions/resource-not-found.exception';
 import User from 'src/data/entities/user.entity';
-import { UserDto } from 'src/user/dtos/user.dto';
+import { UserDto } from 'src/user/dto/user.dto';
 import { EditUserProfileCommand } from './edit-user-profile.command';
 
 @CommandHandler(EditUserProfileCommand)

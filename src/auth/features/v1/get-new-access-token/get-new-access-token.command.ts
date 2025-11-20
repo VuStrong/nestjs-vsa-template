@@ -1,16 +1,11 @@
 import { Command } from '@nestjs/cqrs';
-import { ApiProperty } from '@nestjs/swagger';
+import { GetNewAccessTokenResponseDto } from './get-new-access-token.dto';
 
-export class GetNewAccessTokenCommand extends Command<GetNewAccessTokenResponse> {
+export class GetNewAccessTokenCommand extends Command<GetNewAccessTokenResponseDto> {
     constructor(
         public readonly refreshToken: string,
         public readonly userId: string,
     ) {
         super();
     }
-}
-
-export class GetNewAccessTokenResponse {
-    @ApiProperty()
-    accessToken: string;
 }

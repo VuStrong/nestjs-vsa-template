@@ -11,8 +11,8 @@ import { AppException } from 'src/common/exceptions/app.exception';
 import { ResourceNotFoundException } from 'src/common/exceptions/resource-not-found.exception';
 import {
     GetNewAccessTokenCommand,
-    GetNewAccessTokenResponse,
 } from './get-new-access-token.command';
+import { GetNewAccessTokenResponseDto } from './get-new-access-token.dto';
 
 @CommandHandler(GetNewAccessTokenCommand)
 export class GetNewAccessTokenHandler
@@ -28,7 +28,7 @@ export class GetNewAccessTokenHandler
 
     async execute(
         command: GetNewAccessTokenCommand,
-    ): Promise<GetNewAccessTokenResponse> {
+    ): Promise<GetNewAccessTokenResponseDto> {
         const user = await this.usersRepository.findOne({
             where: { id: command.userId },
             select: {

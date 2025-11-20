@@ -10,12 +10,8 @@ import { CommandBus } from '@nestjs/cqrs';
 
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { ReqUser } from 'src/common/decorators/req-user.decorator';
-import { ZodValidationPipe } from 'src/common/pipes/zod-validation.pipe';
-import { UserDto } from 'src/user/dtos/user.dto';
-import {
-    EditUserProfileRequest,
-    editUserProfileRequestSchema,
-} from './edit-user-profile.request';
+import { UserDto } from 'src/user/dto/user.dto';
+import { EditUserProfileRequestDto } from './edit-user-profile.dto';
 import { EditUserProfileCommand } from './edit-user-profile.command';
 
 @ApiBearerAuth()
@@ -34,8 +30,7 @@ export class EditUserProfileController {
     @Patch('me')
     async patch(
         @ReqUser('sub') userId: string,
-        @Body(new ZodValidationPipe(editUserProfileRequestSchema))
-        request: EditUserProfileRequest,
+        @Body() request: EditUserProfileRequestDto,
     ) {
         const command = new EditUserProfileCommand(userId);
         command.name = request.name;

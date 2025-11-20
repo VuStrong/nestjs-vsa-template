@@ -1,4 +1,4 @@
-import { Body, Controller, HttpCode, Post, UsePipes } from '@nestjs/common';
+import { Body, Controller, HttpCode, Post } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import {
     ApiForbiddenResponse,
@@ -7,11 +7,9 @@ import {
     ApiTags,
 } from '@nestjs/swagger';
 
-import { ZodValidationPipe } from 'src/common/pipes/zod-validation.pipe';
 import {
-    ResetPasswordRequest,
-    resetPasswordRequestSchema,
-} from './reset-password.request';
+    ResetPasswordRequestDto,
+} from './reset-password.dto';
 import { ResetPasswordCommand } from './reset-password.command';
 
 @ApiTags('auth')
@@ -27,8 +25,7 @@ export class ResetPasswordController {
     @ApiOkResponse({ description: 'Success' })
     @HttpCode(200)
     @Post('reset-password')
-    @UsePipes(new ZodValidationPipe(resetPasswordRequestSchema))
-    async post(@Body() request: ResetPasswordRequest) {
+    async post(@Body() request: ResetPasswordRequestDto) {
         return this.commandBus.execute(
             new ResetPasswordCommand(
                 request.userId,

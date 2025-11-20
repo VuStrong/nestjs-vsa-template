@@ -1,7 +1,7 @@
 import { Command } from "@nestjs/cqrs";
-import { ApiProperty } from "@nestjs/swagger";
+import { SignUpResponseDto } from "./sign-up.dto";
 
-export class SignUpCommand extends Command<SignUpResponse> {
+export class SignUpCommand extends Command<SignUpResponseDto> {
     constructor(
         public readonly name: string,
         public readonly email: string,
@@ -9,9 +9,4 @@ export class SignUpCommand extends Command<SignUpResponse> {
     ) {
         super();
     }
-}
-
-export class SignUpResponse {
-    @ApiProperty()
-    userId: string;
 }

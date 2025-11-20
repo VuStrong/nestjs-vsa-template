@@ -10,7 +10,8 @@ import { AppException } from 'src/common/exceptions/app.exception';
 import { AppErrorCode } from 'src/common/app-error-code';
 import User from 'src/data/entities/user.entity';
 import RefreshToken from 'src/data/entities/refresh-token.entity';
-import { LoginCommand, LoginResponse } from './login.command';
+import { LoginCommand } from './login.command';
+import { LoginResponseDto } from './login.dto';
 
 @CommandHandler(LoginCommand)
 export class LoginHandler implements ICommandHandler<LoginCommand> {
@@ -22,7 +23,7 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
         private readonly jwtService: JwtService,
     ) {}
 
-    async execute(command: LoginCommand): Promise<LoginResponse> {
+    async execute(command: LoginCommand): Promise<LoginResponseDto> {
         const user = await this.usersRepository.findOne({
             where: { email: command.email },
             select: {

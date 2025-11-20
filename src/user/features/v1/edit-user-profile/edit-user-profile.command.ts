@@ -1,5 +1,5 @@
 import { Command } from '@nestjs/cqrs';
-import { UserDto } from 'src/user/dtos/user.dto';
+import { UserDto } from 'src/user/dto/user.dto';
 
 export class EditUserProfileCommand extends Command<UserDto> {
     public name?: string;

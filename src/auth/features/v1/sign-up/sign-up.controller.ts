@@ -1,10 +1,9 @@
-import { Body, Controller, Post, UsePipes } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { ApiCreatedResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
-import { ZodValidationPipe } from 'src/common/pipes/zod-validation.pipe';
-import { SignUpCommand, SignUpResponse } from './sign-up.command';
-import { SignUpRequest, signUpRequestSchema } from './sign-up.request';
+import { SignUpCommand } from './sign-up.command';
+import { SignUpRequestDto, SignUpResponseDto } from './sign-up.dto';
 
 @ApiTags('auth')
 @Controller({
@@ -15,10 +14,9 @@ export class SignUpController {
     constructor(private readonly commandBus: CommandBus) {}
 
     @ApiOperation({ summary: 'Create new account' })
-    @ApiCreatedResponse({ type: SignUpResponse })
+    @ApiCreatedResponse({ type: SignUpResponseDto })
     @Post('sign-up')
-    @UsePipes(new ZodValidationPipe(signUpRequestSchema))
-    async signUp(@Body() request: SignUpRequest) {
+    async signUp(@Body() request: SignUpRequestDto) {
         return this.commandBus.execute(
             new SignUpCommand(request.name, request.email, request.password),
         );

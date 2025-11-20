@@ -7,7 +7,8 @@ import { customAlphabet } from 'nanoid'
 import { AppException } from 'src/common/exceptions/app.exception';
 import { AppErrorCode } from 'src/common/app-error-code';
 import User from 'src/data/entities/user.entity';
-import { SignUpCommand, SignUpResponse } from './sign-up.command';
+import { SignUpCommand } from './sign-up.command';
+import { SignUpResponseDto } from './sign-up.dto';
 
 @CommandHandler(SignUpCommand)
 export class SignUpHandler implements ICommandHandler<SignUpCommand> {
@@ -16,7 +17,7 @@ export class SignUpHandler implements ICommandHandler<SignUpCommand> {
         private readonly usersRepository: Repository<User>,
     ) {}
 
-    async execute(command: SignUpCommand): Promise<SignUpResponse> {
+    async execute(command: SignUpCommand): Promise<SignUpResponseDto> {
         const hashedPassword = await bcrypt.hash(command.password, 10);
 
         const user = this.usersRepository.create({

@@ -1,4 +1,4 @@
-import { Controller, Get, Query, UsePipes } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import {
     ApiForbiddenResponse,
@@ -7,11 +7,9 @@ import {
     ApiTags,
 } from '@nestjs/swagger';
 
-import { ZodValidationPipe } from 'src/common/pipes/zod-validation.pipe';
 import {
-    ConfirmEmailRequest,
-    confirmEmailRequestSchema,
-} from './confirm-email.request';
+    ConfirmEmailRequestDto,
+} from './confirm-email.dto';
 import { ConfirmEmailCommand } from './confirm-email.command';
 
 @ApiTags('auth')
@@ -26,8 +24,7 @@ export class ConfirmEmailController {
     @ApiForbiddenResponse({ description: 'Invalid token' })
     @ApiOkResponse({ description: 'Success' })
     @Get('confirm-email')
-    @UsePipes(new ZodValidationPipe(confirmEmailRequestSchema))
-    async confirmEmail(@Query() request: ConfirmEmailRequest) {
+    async confirmEmail(@Query() request: ConfirmEmailRequestDto) {
         return this.commandBus.execute(
             new ConfirmEmailCommand(request.userId, request.token),
         );

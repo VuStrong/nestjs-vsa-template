@@ -1,5 +1,5 @@
 import { Query } from '@nestjs/cqrs';
-import { UserDto } from 'src/user/dtos/user.dto';
+import { UserDto } from 'src/user/dto/user.dto';
 
 export class GetUserByIdQuery extends Query<UserDto> {
     /**

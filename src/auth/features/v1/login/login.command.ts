@@ -1,19 +1,11 @@
 import { Command } from '@nestjs/cqrs';
-import { ApiProperty } from '@nestjs/swagger';
+import { LoginResponseDto } from './login.dto';
 
-export class LoginCommand extends Command<LoginResponse> {
+export class LoginCommand extends Command<LoginResponseDto> {
     constructor(
         public readonly email: string,
         public readonly password: string,
     ) {
         super();
     }
-}
-
-export class LoginResponse {
-    @ApiProperty()
-    accessToken: string;
-
-    @ApiProperty()
-    refreshToken: string;
 }
