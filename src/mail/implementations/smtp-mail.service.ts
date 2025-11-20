@@ -1,40 +1,36 @@
-import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { Inject, Injectable } from '@nestjs/common';
+import type { ConfigType } from '@nestjs/config';
 import { createTransport, Transporter } from 'nodemailer';
-import fs from "fs";
-import { render } from "ejs";
-import juice from "juice";
+import fs from 'fs';
+import { render } from 'ejs';
+import juice from 'juice';
 
-import { SmtpConfig } from 'src/config/configuration';
+import smtpConfig from 'src/config/smtp.config';
+import appConfig from 'src/config/app.config';
 import { MailService, SendMailPayload } from '../mail.service';
 
 @Injectable()
 export class SmtpMailService implements MailService {
     private readonly transport: Transporter;
 
-    private readonly smtpConfig: SmtpConfig;
-    private readonly systemName: string;
-    private readonly systemLogoUrl: string;
-    private readonly systemWebUrl: string;
+    private readonly smtpConfiguration: ConfigType<typeof smtpConfig>;
+    private readonly appConfiguration: ConfigType<typeof appConfig>;
 
-    constructor(configService: ConfigService) {
-        this.systemName = configService.get<string>('system.name') ?? '';
-        this.systemLogoUrl = configService.get<string>('system.logoUrl') ?? '';
-        this.systemWebUrl = configService.get<string>('system.webUrl') ?? '';
-
-        const smtpConfig = configService.get<SmtpConfig>('smtp');
-        if (!smtpConfig) {
-            throw new Error('SMTP configuration is missing');
-        }
-
-        this.smtpConfig = smtpConfig;
+    constructor(
+        @Inject(smtpConfig.KEY)
+        smtpConfiguration: ConfigType<typeof smtpConfig>,
+        @Inject(appConfig.KEY)
+        appConfiguration: ConfigType<typeof appConfig>,
+    ) {
+        this.appConfiguration = appConfiguration;
+        this.smtpConfiguration = smtpConfiguration;
         this.transport = createTransport({
-            host: smtpConfig.host,
-            port: smtpConfig.port,
+            host: smtpConfiguration.host,
+            port: smtpConfiguration.port,
             secure: false,
             auth: {
-                user: smtpConfig.user,
-                pass: smtpConfig.password,
+                user: smtpConfiguration.user,
+                pass: smtpConfiguration.password,
             },
         });
     }
@@ -42,9 +38,9 @@ export class SmtpMailService implements MailService {
     async sendMail(payload: SendMailPayload): Promise<void> {
         // Assign some default values
         payload.context ??= {};
-        payload.context.systemName = this.systemName;
-        payload.context.systemLogoUrl = this.systemLogoUrl;
-        payload.context.systemWebUrl = this.systemWebUrl;
+        payload.context.appName = this.appConfiguration.name;
+        payload.context.appLogoUrl = this.appConfiguration.logoUrl;
+        payload.context.appWebUrl = this.appConfiguration.webUrl;
 
         let html: string | undefined;
         let text: string | undefined;
@@ -65,7 +61,7 @@ export class SmtpMailService implements MailService {
         }
 
         await this.transport.sendMail({
-            from: payload.from ?? this.smtpConfig.user,
+            from: payload.from ?? this.smtpConfiguration.user,
             to: payload.to,
             html,
             text,

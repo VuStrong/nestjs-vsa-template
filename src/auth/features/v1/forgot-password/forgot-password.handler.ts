@@ -1,7 +1,7 @@
 import { Inject } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ConfigService } from '@nestjs/config';
+import type { ConfigType } from '@nestjs/config';
 import { Repository } from 'typeorm';
 import { randomBytes } from 'crypto';
 
@@ -10,6 +10,7 @@ import { ResourceNotFoundException } from 'src/common/exceptions/resource-not-fo
 import User from 'src/data/entities/user.entity';
 import type { MailService } from 'src/mail/mail.service';
 import { MAIL_SERVICE } from 'src/mail/mail.di-tokens';
+import appConfig from 'src/config/app.config';
 import { ForgotPasswordCommand } from './forgot-password.command';
 
 @CommandHandler(ForgotPasswordCommand)
@@ -19,7 +20,8 @@ export class ForgotPasswordHandler
     constructor(
         @InjectRepository(User)
         private readonly usersRepository: Repository<User>,
-        private readonly configService: ConfigService,
+        @Inject(appConfig.KEY)
+        private readonly appCfg: ConfigType<typeof appConfig>,
         @Inject(MAIL_SERVICE)
         private readonly mailService: MailService,
     ) {}
@@ -48,9 +50,7 @@ export class ForgotPasswordHandler
         const expiryTime = new Date();
         expiryTime.setDate(expiryTime.getDate() + 1);
 
-        const webUrl = this.configService.get<string>(
-            'webClientResetPasswordUrl',
-        );
+        const webUrl = this.appCfg.webClientResetPasswordUrl;
         const link = `${webUrl}?token=${token}&userId=${user.id}`;
 
         await this.usersRepository.update(

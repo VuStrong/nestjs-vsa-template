@@ -1,11 +1,10 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
+import { ConfigType } from '@nestjs/config';
 
 import User from 'src/data/entities/user.entity';
 import RefreshToken from 'src/data/entities/refresh-token.entity';
-import { JwtConfig } from 'src/config/configuration';
 import { LoginHandler } from './features/v1/login/login.handler';
 import { LoginController } from './features/v1/login/login.controller';
 import { SignUpHandler } from './features/v1/sign-up/sign-up.handler';
@@ -21,23 +20,19 @@ import { ResetPasswordHandler } from './features/v1/reset-password/reset-passwor
 import { ForgotPasswordController } from './features/v1/forgot-password/forgot-password.controller';
 import { ForgotPasswordHandler } from './features/v1/forgot-password/forgot-password.handler';
 import { MailModule } from 'src/mail/mail.module';
+import jwtConfig from 'src/config/jwt.config';
 
 @Module({
     imports: [
         TypeOrmModule.forFeature([User, RefreshToken]),
         JwtModule.registerAsync({
-            useFactory: (config: ConfigService) => {
-                const jwtConfig = config.get<JwtConfig>('jwt');
-                if (!jwtConfig) throw new Error('JWT configuration not found');
-
-                return {
-                    secret: jwtConfig.secret,
-                    signOptions: {
-                        expiresIn: jwtConfig.expiresIn as any,
-                    },
-                };
-            },
-            inject: [ConfigService],
+            useFactory: (jwt: ConfigType<typeof jwtConfig>) => ({
+                secret: jwt.secret,
+                signOptions: {
+                    expiresIn: jwt.expiresIn as any,
+                },
+            }),
+            inject: [jwtConfig.KEY],
         }),
         MailModule,
     ],

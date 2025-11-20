@@ -2,9 +2,12 @@ import path from 'path';
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule, ConfigType } from '@nestjs/config';
 
-import configuration from './config/configuration';
+import appConfig from './config/app.config';
+import databaseConfig from './config/database.config';
+import jwtConfig from './config/jwt.config';
+import smtpConfig from './config/smtp.config';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 
@@ -12,18 +15,24 @@ import { UserModule } from './user/user.module';
     imports: [
         ConfigModule.forRoot({
             isGlobal: true,
-            load: [configuration],
+            cache: true,
+            load: [appConfig, databaseConfig, jwtConfig, smtpConfig],
         }),
         CqrsModule.forRoot(),
         TypeOrmModule.forRootAsync({
-            useFactory: async (configService: ConfigService) => ({
+            useFactory: (
+                db: ConfigType<typeof databaseConfig>,
+                app: ConfigType<typeof appConfig>,
+            ) => ({
                 type: 'mysql',
                 synchronize: false,
-                logging: configService.get<string>('nodeEnv') === 'development',
-                url: configService.get<string>('database.url'),
-                entities: [path.join(__dirname, '/data/entities/*.entity{.ts,.js}')],
+                logging: app.environment === 'development',
+                url: db.url,
+                entities: [
+                    path.join(__dirname, '/data/entities/*.entity{.ts,.js}'),
+                ],
             }),
-            inject: [ConfigService],
+            inject: [databaseConfig.KEY, appConfig.KEY],
         }),
         AuthModule,
         UserModule,

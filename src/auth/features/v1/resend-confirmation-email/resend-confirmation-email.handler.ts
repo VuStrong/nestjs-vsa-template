@@ -1,7 +1,7 @@
 import { Inject } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ConfigService } from '@nestjs/config';
+import type { ConfigType } from '@nestjs/config';
 import { Repository } from 'typeorm';
 import { randomBytes } from 'crypto';
 
@@ -10,6 +10,7 @@ import { ResourceNotFoundException } from 'src/common/exceptions/resource-not-fo
 import User from 'src/data/entities/user.entity';
 import { MAIL_SERVICE } from 'src/mail/mail.di-tokens';
 import type { MailService } from 'src/mail/mail.service';
+import appConfig from 'src/config/app.config';
 import { ResendConfirmationEmailCommand } from './resend-confirmation-email.command';
 
 @CommandHandler(ResendConfirmationEmailCommand)
@@ -19,7 +20,8 @@ export class ResendConfirmationEmailHandler
     constructor(
         @InjectRepository(User)
         private readonly usersRepository: Repository<User>,
-        private readonly configService: ConfigService,
+        @Inject(appConfig.KEY)
+        private readonly appCfg: ConfigType<typeof appConfig>,
         @Inject(MAIL_SERVICE)
         private readonly mailService: MailService,
     ) {}
@@ -50,9 +52,7 @@ export class ResendConfirmationEmailHandler
             const expiryTime = new Date();
             expiryTime.setDate(expiryTime.getDate() + 1);
 
-            const webUrl = this.configService.get<string>(
-                'webClientConfirmEmailUrl',
-            );
+            const webUrl = this.appCfg.webClientConfirmEmailUrl;
             const link = `${webUrl}?token=${emailConfirmationToken}&userId=${user.id}`;
 
             await this.usersRepository.update(

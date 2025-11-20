@@ -16,10 +16,10 @@ async function bootstrap() {
     });
 
     // Swagger
-    const systemName = process.env.SYSTEM_NAME;
+    const appName = process.env.APP_NAME;
     const swaggerConfig = new DocumentBuilder()
-        .setTitle(`${systemName} API`)
-        .setDescription(`API documentation for ${systemName} Backend`)
+        .setTitle(`${appName} API`)
+        .setDescription(`API documentation for ${appName} Backend`)
         .setVersion('1.0')
         .addBearerAuth()
         .build();

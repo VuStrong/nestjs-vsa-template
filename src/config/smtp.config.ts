@@ -1,0 +1,8 @@
+import { registerAs } from '@nestjs/config';
+
+export default registerAs('smtp', () => ({
+    host: process.env.SMTP_HOST ?? '',
+    port: parseInt(process.env.SMTP_PORT ?? '587', 10) || 587,
+    user: process.env.SMTP_USER ?? '',
+    password: process.env.SMTP_PASS ?? '',
+}));
