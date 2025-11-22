@@ -6,8 +6,9 @@ import {
 } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
-import { GlobalExceptionFilter } from './common/exceptions/global.exception-filter';
-import { ValidationException } from './common/exceptions/validation.exception';
+import { GlobalExceptionFilter } from './common/exceptions/global-exception.filter';
+import { AppException } from './common/exceptions/app.exception';
+import { AppError } from './common/app.error';
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
@@ -55,7 +56,7 @@ function newValidationPipe() {
                     : [];
             });
 
-            return new ValidationException('Validation failed', details);
+            return new AppException(AppError.VALIDATION_ERROR, details);
         },
     });
 }

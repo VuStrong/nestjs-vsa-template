@@ -5,7 +5,6 @@ import bcrypt from 'bcrypt';
 import { customAlphabet } from 'nanoid'
 
 import { AppException } from 'src/common/exceptions/app.exception';
-import { AppErrorCode } from 'src/common/app-error-code';
 import User from 'src/data/entities/user.entity';
 import { SignUpCommand } from './sign-up.command';
 import { SignUpResponseDto } from './sign-up.dto';
@@ -38,11 +37,7 @@ export class SignUpHandler implements ICommandHandler<SignUpCommand> {
                 error instanceof QueryFailedError &&
                 error.driverError.code === 'ER_DUP_ENTRY'
             ) {
-                throw new AppException(
-                    `Email ${command.email} already exists`,
-                    400,
-                    AppErrorCode.DUP_ENTITY_ERROR,
-                );
+                throw AppException.newResourceAlreadyExistedException('User', 'email', command.email);
             }
 
             throw error;

@@ -1,7 +1,6 @@
 import {
     CanActivate,
     ExecutionContext,
-    HttpStatus,
     Inject,
     Injectable,
 } from '@nestjs/common';
@@ -11,8 +10,8 @@ import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { ALLOW_ANONYMOUS_KEY } from '../decorators/allow-anonymous.decorator';
 import { AppException } from '../exceptions/app.exception';
-import { AppErrorCode } from '../app-error-code';
 import jwtConfig from 'src/config/jwt.config';
+import { AppError } from '../app.error';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -30,11 +29,7 @@ export class AuthGuard implements CanActivate {
         if (!token) {
             if (this.checkAllowAnonymous(context)) return true;
 
-            throw new AppException(
-                'Unauthorized',
-                HttpStatus.UNAUTHORIZED,
-                AppErrorCode.AUTHENTICATION_ERROR,
-            );
+            throw new AppException(AppError.UNAUTHORIZED);
         }
 
         try {
@@ -48,11 +43,7 @@ export class AuthGuard implements CanActivate {
         } catch {
             if (this.checkAllowAnonymous(context)) return true;
 
-            throw new AppException(
-                'Unauthorized',
-                HttpStatus.UNAUTHORIZED,
-                AppErrorCode.AUTHENTICATION_ERROR,
-            );
+            throw new AppException(AppError.UNAUTHORIZED);
         }
     }
 

@@ -4,9 +4,8 @@ import { Repository } from 'typeorm';
 import bcrypt from 'bcrypt';
 
 import User from 'src/data/entities/user.entity';
-import { ResourceNotFoundException } from 'src/common/exceptions/resource-not-found.exception';
 import { AppException } from 'src/common/exceptions/app.exception';
-import { AppErrorCode } from 'src/common/app-error-code';
+import { AppError } from 'src/common/app.error';
 import { ResetPasswordCommand } from './reset-password.command';
 
 @CommandHandler(ResetPasswordCommand)
@@ -29,7 +28,7 @@ export class ResetPasswordHandler
         });
 
         if (!user) {
-            throw new ResourceNotFoundException('User', command.userId);
+            throw AppException.newResourceNotFoundException('User', 'id', command.userId);
         }
 
         if (
@@ -49,11 +48,7 @@ export class ResetPasswordHandler
                 },
             );
         } else {
-            throw new AppException(
-                'Invalid token',
-                403,
-                AppErrorCode.FORBIDDEN_ACTION,
-            );
+            throw new AppException(AppError.TOKEN_INVALID);
         }
     }
 }

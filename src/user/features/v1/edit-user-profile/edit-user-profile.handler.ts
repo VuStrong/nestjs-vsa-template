@@ -2,9 +2,9 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { ResourceNotFoundException } from 'src/common/exceptions/resource-not-found.exception';
 import User from 'src/data/entities/user.entity';
 import { UserDto } from 'src/user/dto/user.dto';
+import { AppException } from 'src/common/exceptions/app.exception';
 import { EditUserProfileCommand } from './edit-user-profile.command';
 
 @CommandHandler(EditUserProfileCommand)
@@ -22,7 +22,7 @@ export class EditUserProfileHandler
         });
 
         if (!user) {
-            throw new ResourceNotFoundException('User', command.userId);
+            throw AppException.newResourceNotFoundException('User', 'id', command.userId);
         }
 
         if (command.name) user.name = command.name;

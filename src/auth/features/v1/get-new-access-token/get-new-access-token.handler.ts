@@ -6,13 +6,12 @@ import { Repository } from 'typeorm';
 
 import User from 'src/data/entities/user.entity';
 import RefreshToken from 'src/data/entities/refresh-token.entity';
-import { AppErrorCode } from 'src/common/app-error-code';
 import { AppException } from 'src/common/exceptions/app.exception';
-import { ResourceNotFoundException } from 'src/common/exceptions/resource-not-found.exception';
 import {
     GetNewAccessTokenCommand,
 } from './get-new-access-token.command';
 import { GetNewAccessTokenResponseDto } from './get-new-access-token.dto';
+import { AppError } from 'src/common/app.error';
 
 @CommandHandler(GetNewAccessTokenCommand)
 export class GetNewAccessTokenHandler
@@ -40,15 +39,11 @@ export class GetNewAccessTokenHandler
         });
 
         if (!user) {
-            throw new ResourceNotFoundException('User', command.userId);
+            throw AppException.newResourceNotFoundException('User', 'id', command.userId);
         }
 
         if (user.isLocked()) {
-            throw new AppException(
-                'Account is locked',
-                HttpStatus.FORBIDDEN,
-                AppErrorCode.ACCOUNT_LOCKED_OUT,
-            );
+            throw new AppException(AppError.USER_LOCKED);
         }
 
         const token = await this.refreshTokensRepository.findOne({
@@ -59,11 +54,7 @@ export class GetNewAccessTokenHandler
         });
 
         if (!token || token.expiryTime < new Date()) {
-            throw new AppException(
-                'Invalid refresh token',
-                HttpStatus.UNAUTHORIZED,
-                AppErrorCode.AUTHENTICATION_ERROR,
-            );
+            throw new AppException(AppError.TOKEN_INVALID);
         }
 
         const accessToken = await this.jwtService.signAsync({

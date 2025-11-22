@@ -5,13 +5,13 @@ import type { ConfigType } from '@nestjs/config';
 import { Repository } from 'typeorm';
 import { randomBytes } from 'crypto';
 
-import { ValidationException } from 'src/common/exceptions/validation.exception';
-import { ResourceNotFoundException } from 'src/common/exceptions/resource-not-found.exception';
 import User from 'src/data/entities/user.entity';
 import type { MailService } from 'src/mail/mail.service';
 import { MAIL_SERVICE } from 'src/mail/mail.di-tokens';
 import appConfig from 'src/config/app.config';
 import { ForgotPasswordCommand } from './forgot-password.command';
+import { AppException } from 'src/common/exceptions/app.exception';
+import { AppError } from 'src/common/app.error';
 
 @CommandHandler(ForgotPasswordCommand)
 export class ForgotPasswordHandler
@@ -30,7 +30,10 @@ export class ForgotPasswordHandler
         const email = command.email.trim().toLowerCase();
 
         if (!email) {
-            throw new ValidationException('Field email is missing');
+            throw new AppException({
+                ...AppError.VALIDATION_ERROR,
+                message: 'Field email is missing',
+            });
         }
 
         const user = await this.usersRepository.findOne({
@@ -43,7 +46,7 @@ export class ForgotPasswordHandler
         });
 
         if (!user) {
-            throw new ResourceNotFoundException('User', email);
+            throw AppException.newResourceNotFoundException('User', 'email', email);
         }
 
         const token = randomBytes(64).toString('hex');

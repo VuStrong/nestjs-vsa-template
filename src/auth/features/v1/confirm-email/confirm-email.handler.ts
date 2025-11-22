@@ -4,9 +4,8 @@ import { Repository } from 'typeorm';
 
 import User from 'src/data/entities/user.entity';
 import { AppException } from 'src/common/exceptions/app.exception';
-import { AppErrorCode } from 'src/common/app-error-code';
-import { ResourceNotFoundException } from 'src/common/exceptions/resource-not-found.exception';
 import { ConfirmEmailCommand } from './confirm-email.command';
+import { AppError } from 'src/common/app.error';
 
 @CommandHandler(ConfirmEmailCommand)
 export class ConfirmEmailHandler
@@ -18,14 +17,6 @@ export class ConfirmEmailHandler
     ) {}
 
     async execute(command: ConfirmEmailCommand): Promise<void> {
-        if (!command.userId || !command.token) {
-            throw new AppException(
-                'Invalid command data',
-                400,
-                AppErrorCode.VALIDATION_ERROR,
-            );
-        }
-
         const user = await this.usersRepository.findOne({
             where: { id: command.userId },
             select: {
@@ -36,7 +27,7 @@ export class ConfirmEmailHandler
         });
 
         if (!user) {
-            throw new ResourceNotFoundException('User', command.userId);
+            throw AppException.newResourceNotFoundException('User', 'id', command.userId);
         }
 
         if (user.emailConfirmed) {
@@ -58,11 +49,7 @@ export class ConfirmEmailHandler
                 },
             );
         } else {
-            throw new AppException(
-                'Invalid token',
-                403,
-                AppErrorCode.FORBIDDEN_ACTION,
-            );
+            throw new AppException(AppError.TOKEN_INVALID);
         }
     }
 }

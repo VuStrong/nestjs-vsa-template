@@ -2,11 +2,11 @@ import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityPropertyNotFoundError, Repository } from 'typeorm';
 
-import { ValidationException } from 'src/common/exceptions/validation.exception';
-import { ResourceNotFoundException } from 'src/common/exceptions/resource-not-found.exception';
 import User from 'src/data/entities/user.entity';
 import { UserDto } from 'src/user/dto/user.dto';
 import { GetUserByIdQuery } from './get-user-by-id.query';
+import { AppException } from 'src/common/exceptions/app.exception';
+import { AppError } from 'src/common/app.error';
 
 @QueryHandler(GetUserByIdQuery)
 export class GetUserByIdHandler implements IQueryHandler<GetUserByIdQuery> {
@@ -17,7 +17,10 @@ export class GetUserByIdHandler implements IQueryHandler<GetUserByIdQuery> {
 
     async execute(query: GetUserByIdQuery): Promise<UserDto> {
         if (!query.id) {
-            throw new ValidationException('User ID is missing');
+            throw new AppException({
+                ...AppError.VALIDATION_ERROR,
+                message: 'User ID is missing',
+            });
         }
 
         const fieldsToSelect = query.fields?.split(',') as any[];
@@ -30,14 +33,17 @@ export class GetUserByIdHandler implements IQueryHandler<GetUserByIdQuery> {
             });
         } catch (error) {
             if (error instanceof EntityPropertyNotFoundError) {
-                throw new ValidationException(error.message);
+                throw new AppException({
+                    ...AppError.VALIDATION_ERROR,
+                    message: error.message,
+                });
             }
 
             throw error;
         }
 
         if (!user) {
-            throw new ResourceNotFoundException('User', query.id);
+            throw AppException.newResourceNotFoundException('User', 'id', query.id);
         }
 
         return UserDto.fromUserEntity(user);

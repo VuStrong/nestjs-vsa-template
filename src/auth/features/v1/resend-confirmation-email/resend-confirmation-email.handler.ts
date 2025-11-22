@@ -5,12 +5,12 @@ import type { ConfigType } from '@nestjs/config';
 import { Repository } from 'typeorm';
 import { randomBytes } from 'crypto';
 
-import { ValidationException } from 'src/common/exceptions/validation.exception';
-import { ResourceNotFoundException } from 'src/common/exceptions/resource-not-found.exception';
 import User from 'src/data/entities/user.entity';
 import { MAIL_SERVICE } from 'src/mail/mail.di-tokens';
 import type { MailService } from 'src/mail/mail.service';
 import appConfig from 'src/config/app.config';
+import { AppException } from 'src/common/exceptions/app.exception';
+import { AppError } from 'src/common/app.error';
 import { ResendConfirmationEmailCommand } from './resend-confirmation-email.command';
 
 @CommandHandler(ResendConfirmationEmailCommand)
@@ -30,7 +30,10 @@ export class ResendConfirmationEmailHandler
         const email = command.email.trim().toLowerCase();
 
         if (!email) {
-            throw new ValidationException('Field email is missing');
+            throw new AppException({
+                ...AppError.VALIDATION_ERROR,
+                message: 'Field email is missing',
+            });
         }
 
         const user = await this.usersRepository.findOne({
@@ -44,7 +47,7 @@ export class ResendConfirmationEmailHandler
         });
 
         if (!user) {
-            throw new ResourceNotFoundException('User', email);
+            throw AppException.newResourceNotFoundException('User', 'email', email);
         }
 
         if (!user.emailConfirmed) {

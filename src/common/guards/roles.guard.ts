@@ -2,8 +2,8 @@ import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from '../decorators/roles.decorator';
 import { AppException } from '../exceptions/app.exception';
-import { AppErrorCode } from '../app-error-code';
 import { Role } from '../enums/role.enum';
+import { AppError } from '../app.error';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -32,11 +32,7 @@ export class RolesGuard implements CanActivate {
         if (allow) {
             return true;
         } else {
-            throw new AppException(
-                'Forbidden resource',
-                403,
-                AppErrorCode.FORBIDDEN_ACTION,
-            );
+            throw new AppException(AppError.FORBIDDEN_RESOURCE);
         }
     }
 }

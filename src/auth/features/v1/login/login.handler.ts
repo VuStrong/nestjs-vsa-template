@@ -7,11 +7,11 @@ import bcrypt from 'bcrypt';
 import crypto from "crypto";
 
 import { AppException } from 'src/common/exceptions/app.exception';
-import { AppErrorCode } from 'src/common/app-error-code';
 import User from 'src/data/entities/user.entity';
 import RefreshToken from 'src/data/entities/refresh-token.entity';
 import { LoginCommand } from './login.command';
 import { LoginResponseDto } from './login.dto';
+import { AppError } from 'src/common/app.error';
 
 @CommandHandler(LoginCommand)
 export class LoginHandler implements ICommandHandler<LoginCommand> {
@@ -36,20 +36,12 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
         });
 
         if (!user) {
-            throw new AppException(
-                'Email or password is not correct',
-                HttpStatus.UNAUTHORIZED,
-                AppErrorCode.AUTHENTICATION_ERROR,
-            );
+            throw new AppException(AppError.INVALID_CREDENTIALS);
         }
 
         // Password maybe null if sign up with external login method.
         if (user.hashedPassword === null) {
-            throw new AppException(
-                'Your account is not registered with email and password. Try using another login method or reset your password',
-                HttpStatus.UNAUTHORIZED,
-                AppErrorCode.LOGIN_PASSWORD_NOT_SET,
-            );
+            throw new AppException(AppError.LOGIN_PASSWORD_NOT_SET);
         }
 
         const isPasswordMatched = await bcrypt.compare(
@@ -58,19 +50,11 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
         );
 
         if (!isPasswordMatched) {
-            throw new AppException(
-                'Email or password is not correct',
-                HttpStatus.UNAUTHORIZED,
-                AppErrorCode.AUTHENTICATION_ERROR,
-            );
+            throw new AppException(AppError.INVALID_CREDENTIALS);
         }
 
         if (user.isLocked()) {
-            throw new AppException(
-                'Account is locked',
-                HttpStatus.FORBIDDEN,
-                AppErrorCode.ACCOUNT_LOCKED_OUT,
-            );
+            throw new AppException(AppError.USER_LOCKED);
         }
 
         const accessToken = await this.jwtService.signAsync({
